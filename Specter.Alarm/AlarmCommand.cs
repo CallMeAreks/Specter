@@ -1,4 +1,4 @@
-﻿namespace Specter.Models
+﻿namespace Specter.Alarm
 {
     public enum AlarmCommand
     {

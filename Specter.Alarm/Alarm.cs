@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Specter.Models
+namespace Specter.Alarm
 {
     public sealed class Alarm
     {

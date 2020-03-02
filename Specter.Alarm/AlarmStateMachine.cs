@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Specter.Models
+namespace Specter.Alarm
 {
     internal sealed class AlarmStateMachine
     {
