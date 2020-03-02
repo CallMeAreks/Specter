@@ -14,10 +14,7 @@ namespace Specter.Models
         private StateMachine<AlarmStatus, AlarmCommand> StateMachine { get; set; }
         private bool AllowAccessToArm { get; set; }
 
-        internal AlarmStateMachine(AlarmStatus initialStatus)
-        {
-            InitializeStateMachine(initialStatus);
-        }
+        internal AlarmStateMachine(AlarmStatus initialStatus) => InitializeStateMachine(initialStatus);
 
         internal void TriggerArm(AlarmCommand mode, int pendingTime)
         {
@@ -27,15 +24,10 @@ namespace Specter.Models
             StateMachine.FireAsync(ArmingParameters, mode, pendingTime);
         }
 
-        internal void TriggerDisarm()
-        {
-            StateMachine.Fire(AlarmCommand.Disarm);
-        }
+        internal void TriggerDisarm() => StateMachine.Fire(AlarmCommand.Disarm);
 
-        internal void OnTransitioned(Action<StateMachine<AlarmStatus, AlarmCommand>.Transition> callback)
-        {
-            StateMachine.OnTransitioned(callback);
-        }
+        internal void OnTransitioned(Action<StateMachine<AlarmStatus, AlarmCommand>.Transition> callback) 
+            => StateMachine.OnTransitioned(callback);
 
         private void InitializeStateMachine(AlarmStatus initialStatus)
         {
@@ -79,6 +71,7 @@ namespace Specter.Models
 
         private void ConfigureArmedStates()
         {
+            // When the alarm is armed the only allowed states are Disarm and Trigger
             // Armed away
             StateMachine.Configure(AlarmStatus.ArmedAway)
                         .Permit(AlarmCommand.Disarm, AlarmStatus.Disarmed)
