@@ -1,4 +1,4 @@
-﻿namespace Specter.Alarm
+﻿namespace Specter.Alarm.Enums
 {
     public enum AlarmCommand
     {

@@ -1,0 +1,82 @@
+﻿[
+  {
+    "Code": 120,
+    "Description": "Fire Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 121,
+    "Description": "Duress Alarm",
+    "Type": "User"
+  },
+  {
+    "Code": 122,
+    "Description": "Silent Alarm",
+    "Type": "User"
+  },
+  {
+    "Code": 131,
+    "Description": "Perimeter Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 132,
+    "Description": "Interior Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 133,
+    "Description": "24 Hour Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 134,
+    "Description": "Entry/Exit Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 137,
+    "Description": "Tamper Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 144,
+    "Description": "Sensor Tamper Alarm",
+    "Type": "Zone"
+  },
+  {
+    "Code": 301,
+    "Description": "AC Loss",
+    "Type": "Zone"
+  },
+  {
+    "Code": 302,
+    "Description": "Low System Battery",
+    "Type": "Zone"
+  },
+  {
+    "Code": 306,
+    "Description": "Panel Programming Changed",
+    "Type": "Zone"
+  },
+  {
+    "Code": 381,
+    "Description": "Loss Of Supervision",
+    "Type": "Zone"
+  },
+  {
+    "Code": 384,
+    "Description": "Sensor Low Battery",
+    "Type": "Zone"
+  },
+  {
+    "Code": 401,
+    "Description": "Open/Close By User",
+    "Type": "User"
+  },
+  {
+    "Code": 441,
+    "Description": "Armed Home",
+    "Type": "User"
+  }
+]

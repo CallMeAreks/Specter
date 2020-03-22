@@ -1,4 +1,4 @@
-﻿namespace Specter.Alarm
+﻿namespace Specter.Alarm.Events
 {
     public class EventType
     {

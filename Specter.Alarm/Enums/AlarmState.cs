@@ -1,6 +1,6 @@
-﻿namespace Specter.Alarm
+﻿namespace Specter.Alarm.Enums
 {
-    public enum AlarmStatus
+    public enum AlarmState
     {
         Disarmed,
         ArmedAway,

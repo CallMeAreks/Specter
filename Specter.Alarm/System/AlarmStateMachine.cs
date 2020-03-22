@@ -1,24 +1,26 @@
-﻿using Stateless;
+﻿using Specter.Alarm.Enums;
+using Specter.Alarm.Extensions;
+using Stateless;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Specter.Alarm
+namespace Specter.Alarm.System
 {
     internal sealed class AlarmStateMachine
     {
         internal IEnumerable<AlarmCommand> Triggers => StateMachine.PermittedTriggers;
-        internal AlarmStatus Status => StateMachine.State;
+        internal AlarmState State => StateMachine.State;
 
-        private StateMachine<AlarmStatus, AlarmCommand>.TriggerWithParameters<AlarmCommand, int> ArmingParameters { get; set; }
-        private StateMachine<AlarmStatus, AlarmCommand> StateMachine { get; set; }
+        private StateMachine<AlarmState, AlarmCommand>.TriggerWithParameters<AlarmCommand, int> ArmingParameters { get; set; }
+        private StateMachine<AlarmState, AlarmCommand> StateMachine { get; set; }
         private bool AllowAccessToArm { get; set; }
 
-        internal AlarmStateMachine(AlarmStatus initialStatus) => InitializeStateMachine(initialStatus);
+        internal AlarmStateMachine(AlarmState initialStatus) => InitializeStateMachine(initialStatus);
 
         internal void TriggerArm(AlarmCommand mode, int pendingTime)
         {
-            if (mode != AlarmCommand.ArmAway && mode != AlarmCommand.ArmHome)
+            if (!mode.IsArmCommand())
                 throw new NotSupportedException();
 
             StateMachine.FireAsync(ArmingParameters, mode, pendingTime);
@@ -26,12 +28,12 @@ namespace Specter.Alarm
 
         internal void TriggerDisarm() => StateMachine.Fire(AlarmCommand.Disarm);
 
-        internal void OnTransitioned(Action<StateMachine<AlarmStatus, AlarmCommand>.Transition> callback) 
+        internal void OnTransitioned(Action<StateMachine<AlarmState, AlarmCommand>.Transition> callback) 
             => StateMachine.OnTransitioned(callback);
 
-        private void InitializeStateMachine(AlarmStatus initialStatus)
+        private void InitializeStateMachine(AlarmState initialStatus)
         {
-            StateMachine = new StateMachine<AlarmStatus, AlarmCommand>(initialStatus);
+            StateMachine = new StateMachine<AlarmState, AlarmCommand>(initialStatus);
 
             ArmingParameters = StateMachine.SetTriggerParameters<AlarmCommand, int>(AlarmCommand.ArmWithTimer);
 
@@ -44,15 +46,15 @@ namespace Specter.Alarm
 
         private void ConfigureDisarmedState()
         {
-            StateMachine.Configure(AlarmStatus.Disarmed)
-                        .Permit(AlarmCommand.ArmAway, AlarmStatus.ArmedAway)
-                        .Permit(AlarmCommand.ArmHome, AlarmStatus.ArmedHome)
-                        .Permit(AlarmCommand.ArmWithTimer, AlarmStatus.Arming);
+            StateMachine.Configure(AlarmState.Disarmed)
+                        .Permit(AlarmCommand.ArmAway, AlarmState.ArmedAway)
+                        .Permit(AlarmCommand.ArmHome, AlarmState.ArmedHome)
+                        .Permit(AlarmCommand.ArmWithTimer, AlarmState.Arming);
         }
 
         private void ConfigureArmingState()
         {
-            StateMachine.Configure(AlarmStatus.Arming)
+            StateMachine.Configure(AlarmState.Arming)
             .OnEntryFromAsync(
                 ArmingParameters,
                 async (armState, count) =>
@@ -63,9 +65,9 @@ namespace Specter.Alarm
                 }
             )
             .OnExit(() => AllowAccessToArm = false)
-            .Permit(AlarmCommand.Disarm, AlarmStatus.Disarmed)
-            .PermitIf(AlarmCommand.ArmAway, AlarmStatus.ArmedAway, () => AllowAccessToArm)
-            .PermitIf(AlarmCommand.ArmHome, AlarmStatus.ArmedHome, () => AllowAccessToArm)
+            .Permit(AlarmCommand.Disarm, AlarmState.Disarmed)
+            .PermitIf(AlarmCommand.ArmAway, AlarmState.ArmedAway, () => AllowAccessToArm)
+            .PermitIf(AlarmCommand.ArmHome, AlarmState.ArmedHome, () => AllowAccessToArm)
             ;
         }
 
@@ -73,21 +75,21 @@ namespace Specter.Alarm
         {
             // When the alarm is armed the only allowed states are Disarm and Trigger
             // Armed away
-            StateMachine.Configure(AlarmStatus.ArmedAway)
-                        .Permit(AlarmCommand.Disarm, AlarmStatus.Disarmed)
-                        .Permit(AlarmCommand.Trigger, AlarmStatus.Triggered)
+            StateMachine.Configure(AlarmState.ArmedAway)
+                        .Permit(AlarmCommand.Disarm, AlarmState.Disarmed)
+                        .Permit(AlarmCommand.Trigger, AlarmState.Triggered)
                         ;
 
             // Armed home
-            StateMachine.Configure(AlarmStatus.ArmedHome)
-                        .SubstateOf(AlarmStatus.ArmedAway)
+            StateMachine.Configure(AlarmState.ArmedHome)
+                        .SubstateOf(AlarmState.ArmedAway)
                         ;
         }
 
         private void ConfigureTriggeredState()
         {
-            StateMachine.Configure(AlarmStatus.Triggered)
-                        .Permit(AlarmCommand.Disarm, AlarmStatus.Disarmed)
+            StateMachine.Configure(AlarmState.Triggered)
+                        .Permit(AlarmCommand.Disarm, AlarmState.Disarmed)
                         ;
         }
     }
