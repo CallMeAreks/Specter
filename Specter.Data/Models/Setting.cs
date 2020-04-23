@@ -2,7 +2,7 @@
 
 namespace Specter.Data.Models
 {
-    public class Setting
+    public class Setting : Entity
     {
         [ExplicitKey]
         public string Key { get; set; }

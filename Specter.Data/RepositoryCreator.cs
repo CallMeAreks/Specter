@@ -1,7 +1,9 @@
-﻿namespace Specter.Data
+﻿using Specter.Data.Models;
+
+namespace Specter.Data
 {
     public static class RepositoryCreator
     {
-        public static IRepository<T> Create<T>() where T : class => new Repository<T>();
+        public static IRepository<T> Create<T>() where T  : Entity => new Repository<T>();
     }
 }
