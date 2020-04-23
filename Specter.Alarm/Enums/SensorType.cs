@@ -2,7 +2,8 @@
 {
     public enum SensorType
     {
-        OpenClose,
+        Door,
+        Window,
         Motion,
         Button
     }

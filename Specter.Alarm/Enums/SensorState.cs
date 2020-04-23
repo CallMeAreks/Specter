@@ -2,7 +2,7 @@
 {
     public enum SensorState
     {
-        Open,
-        Closed
+        Closed,
+        Open
     }
 }
