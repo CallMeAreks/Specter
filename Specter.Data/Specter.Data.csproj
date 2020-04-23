@@ -8,4 +8,16 @@
     <ProjectReference Include="..\Specter.Alarm\Specter.Alarm.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.35" />
+    <PackageReference Include="Dapper.Contrib" Version="2.0.35" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="db.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

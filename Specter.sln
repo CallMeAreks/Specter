@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Specter.Alarm", "Specter.Al
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Specter.EventProcessing", "Specter.EventProcessing\Specter.EventProcessing.csproj", "{E157EB2F-ED77-48C7-9622-41E6A5E17873}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Specter.Data", "Specter.Data\Specter.Data.csproj", "{8BBFA922-B0E9-4742-AF1D-D6F59D8D81BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Specter.Data", "Specter.Data\Specter.Data.csproj", "{8BBFA922-B0E9-4742-AF1D-D6F59D8D81BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
