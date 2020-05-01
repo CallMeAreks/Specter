@@ -12,16 +12,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Rtl433\librtlsdr.dll">
+    <ProjectReference Include="..\Specter.Alarm\Specter.Alarm.csproj" />
+    <ProjectReference Include="..\Specter.Data\Specter.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="rtl\librtlsdr.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Rtl433\libusb-1.0.dll">
+    <None Update="rtl\libusb-1.0.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Rtl433\rtl_433.exe">
+    <None Update="rtl\rtl_433.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Rtl433\rtl_433_64bit_static.exe">
+    <None Update="rtl\rtl_433_64bit_static.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
