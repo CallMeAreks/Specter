@@ -1,5 +1,6 @@
 ﻿using CliWrap;
 using CliWrap.EventStream;
+using Specter.EventProcessing.Utils;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -17,16 +18,22 @@ namespace Specter.EventProcessing.Events
         // not to mark type as beforefieldinit
         static EventReceiver() { }
 
-        private EventReceiver() { }
+        private EventReceiver() 
+        {
+            // TODO: Close rtl process
+        }
 
         public static EventReceiver Instance => instance;
 
-        private string Rtl433Path => $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\Rtl433\\rtl_433.exe";
+        private string Rtl433Path => $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\rtl\\rtl_433.exe";
 
         public async Task ListenAsync()
         {
             var cmd = Cli.Wrap(Rtl433Path);
-
+            IEventHandler handler = new DeviceEventHandler();
+            var eventRateLimiter = new EventRateLimiter();
+            var eventParser = new EventParser();
+            
             await foreach (var cmdEvent in cmd.ListenAsync(ReceiverCancellationTokenSource.Token))
             {
                 switch (cmdEvent)
@@ -36,7 +43,18 @@ namespace Specter.EventProcessing.Events
                         System.Diagnostics.Debug.WriteLine($"Process started; ID: {started.ProcessId}");
                         break;
                     case StandardOutputCommandEvent stdOut:
-                        System.Diagnostics.Debug.WriteLine($"Out> {stdOut.Text}");
+                        var eventData = eventParser.ParseFromJson(stdOut.Text);
+                        if (eventRateLimiter.IsAllowedEvent(eventData))
+                        {
+                            
+                            System.Diagnostics.Debug.WriteLine($"Event accepted: {eventData.DeviceId}_{eventData.Payload.PadLeft(2, '0')} = {eventData.ReceivedOn.Ticks}");
+                            //await handler.HandleAsync(eventData);
+                        }
+                        else
+                        {
+
+                            System.Diagnostics.Debug.WriteLine($"Event rejected: {eventData.DeviceId}_{eventData.Payload.PadLeft(2, '0')} = {eventData.ReceivedOn.Ticks}");
+                        }
                         break;
                     case StandardErrorCommandEvent stdErr:
                         System.Diagnostics.Debug.WriteLine($"Err> {stdErr.Text}");

@@ -1,7 +1,9 @@
-﻿namespace Specter.EventProcessing.Events
+﻿using System.Threading.Tasks;
+
+namespace Specter.EventProcessing.Events
 {
     public interface IEventHandler
     {
-        public EventHandlerResponse Handle(IEventData data);
+        public Task<EventHandlerResponse> HandleAsync(IEventData data);
     }
 }
