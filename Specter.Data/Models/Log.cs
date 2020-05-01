@@ -6,6 +6,7 @@ namespace Specter.Data.Models
     {
         public string Message { get; set; }
         public int Level { get; set; }
+        public string Component { get; set; }
         public int Timestamp { get; set; }
     }
 
