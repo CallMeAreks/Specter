@@ -4,7 +4,7 @@ namespace Specter.Alarm.System
 {
     public class Sensor
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public bool Enabled { get; set; }
         public SensorType Type { get; set; }
