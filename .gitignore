@@ -22,3 +22,5 @@ Specter.EventProcessing/obj/
 Specter.Data/bin/
 
 Specter.Data/obj/
+
+*.user
