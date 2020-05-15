@@ -1,7 +1,9 @@
 ﻿using CliWrap;
 using CliWrap.EventStream;
 using Specter.EventProcessing.Utils;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,58 +16,73 @@ namespace Specter.EventProcessing.Events
         private CancellationTokenSource ReceiverCancellationTokenSource = new CancellationTokenSource();
         private int ProcessId;
 
+        private string Rtl433Path => $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\rtl\\rtl_433.exe";
+        private EventRateLimiter RateLimiter = new EventRateLimiter();
+        private EventParser EventParser = new EventParser();
+        private IEventHandler Handler = new DeviceEventHandler();
+
         // Explicit static constructor to tell C# compiler
         // not to mark type as beforefieldinit
         static EventReceiver() { }
 
         private EventReceiver() 
         {
-            // TODO: Close rtl process
+            // Close rtl_433 if it's already running
+            CloseRtl433Process();
         }
 
         public static EventReceiver Instance => instance;
 
-        private string Rtl433Path => $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\rtl\\rtl_433.exe";
-
         public async Task ListenAsync()
         {
             var cmd = Cli.Wrap(Rtl433Path);
-            IEventHandler handler = new DeviceEventHandler();
-            var eventRateLimiter = new EventRateLimiter();
-            var eventParser = new EventParser();
-            
+
             await foreach (var cmdEvent in cmd.ListenAsync(ReceiverCancellationTokenSource.Token))
             {
                 switch (cmdEvent)
                 {
                     case StartedCommandEvent started:
                         ProcessId = started.ProcessId;
-                        System.Diagnostics.Debug.WriteLine($"Process started; ID: {started.ProcessId}");
+                        Debug.WriteLine($"Process started; ID: {started.ProcessId}");
                         break;
-                    case StandardOutputCommandEvent stdOut:
-                        var eventData = eventParser.ParseFromJson(stdOut.Text);
-                        if (eventRateLimiter.IsAllowedEvent(eventData))
-                        {
-                            
-                            System.Diagnostics.Debug.WriteLine($"Event accepted: {eventData.DeviceId}_{eventData.Payload.PadLeft(2, '0')} = {eventData.ReceivedOn.Ticks}");
-                            //await handler.HandleAsync(eventData);
-                        }
-                        else
-                        {
-
-                            System.Diagnostics.Debug.WriteLine($"Event rejected: {eventData.DeviceId}_{eventData.Payload.PadLeft(2, '0')} = {eventData.ReceivedOn.Ticks}");
-                        }
+                    case StandardOutputCommandEvent stdOutEvent:
+                        await HandleEvent(stdOutEvent);
                         break;
                     case StandardErrorCommandEvent stdErr:
-                        System.Diagnostics.Debug.WriteLine($"Err> {stdErr.Text}");
+                        Debug.WriteLine($"Err> {stdErr.Text}");
                         break;
                     case ExitedCommandEvent exited:
-                        System.Diagnostics.Debug.WriteLine($"Process exited; Code: {exited.ExitCode}");
+                        Debug.WriteLine($"Process exited; Code: {exited.ExitCode}");
                         break;
                 }
             }
         }
 
-        public void StopListening() => ReceiverCancellationTokenSource.Cancel();
+        private async Task HandleEvent(StandardOutputCommandEvent ev)
+        {
+            var eventData = EventParser.ParseFromJson(ev.Text);
+            var uid = RateLimiter.ValidateEvent(eventData);
+            
+            if (uid.HasValue)
+            {
+                var response = await Handler.HandleAsync(eventData);
+
+                if (response.Success)
+                {
+                    RateLimiter.MarkEventAsProcessed(uid.Value, eventData);
+                }
+            }
+        }
+
+        private void CloseRtl433Process()
+        {
+            Process.GetProcessesByName("rtl_433").ToList().ForEach(p => p.Kill());
+        }
+
+        public void StopListening()
+        {
+            ReceiverCancellationTokenSource.Cancel();
+            CloseRtl433Process();
+        }
     }
 }

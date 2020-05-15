@@ -1,11 +1,17 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Specter.EventProcessing.Events
 {
     public class EventData : IEventData
     {
-        public string DeviceId { get; set; }
-        public string Payload { get; set; }
-        public DateTime ReceivedOn { get; set; }
+        [JsonPropertyName("Id")]
+        public int DeviceId { get; set; }
+
+        [JsonPropertyName("Event")]
+        public int EventType { get; set; }
+
+        [JsonIgnore]
+        public DateTime ReceivedOn { get; set; } = DateTime.UtcNow;
     }
 }

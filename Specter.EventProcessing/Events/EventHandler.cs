@@ -18,12 +18,13 @@ namespace Specter.EventProcessing.Events
             var alarmEvent = await GetAlarmEvent(data);
 
             // Save event
-            await EventRepository.InsertAsync(alarmEvent.ToEntityEvent());
+            int id = await EventRepository.InsertAsync(alarmEvent.ToEntityEvent());
 
             // Determine if alarm is triggered
             // notify
             // raise events
-            return null;
+
+            return new EventHandlerResponse { EventId = id };
         }
 
         private async Task<Alarm.Events.Event> GetAlarmEvent(IEventData data)

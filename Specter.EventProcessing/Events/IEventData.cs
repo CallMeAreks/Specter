@@ -4,8 +4,8 @@ namespace Specter.EventProcessing.Events
 {
     public interface IEventData
     {
-        string DeviceId { get; set; }
-        string Payload { get; set; }
+        int DeviceId { get; set; }
+        int EventType { get; set; }
         DateTime ReceivedOn { get; set; }
     }
 }

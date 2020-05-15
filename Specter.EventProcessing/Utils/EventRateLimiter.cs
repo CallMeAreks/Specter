@@ -1,5 +1,4 @@
 ﻿using Specter.EventProcessing.Events;
-using System;
 using System.Collections.Generic;
 
 namespace Specter.EventProcessing.Utils
@@ -9,30 +8,36 @@ namespace Specter.EventProcessing.Utils
         private readonly IDictionary<int, long> Cache = new Dictionary<int, long>();
         private const int MinimumIntervalTicks = 35000000;
 
-        public bool IsAllowedEvent(IEventData eventData)
+        public int? ValidateEvent(IEventData eventData)
         {
-            var key = GetUniqueKey(eventData.DeviceId, eventData.Payload);
+            // Calculate a unique hash for the device id and event type
+            var key = GetUniqueKey(eventData.DeviceId, eventData.EventType);
+            // Get the date and time as ticks to make the comparisons
             long eventTicks = eventData.ReceivedOn.Ticks;
 
-            if (Cache.TryGetValue(key, out var lastEventTicks))
-            {
-                var isValid = eventTicks - lastEventTicks > MinimumIntervalTicks;
-
-                if (isValid)
-                {
-                    Cache[key] = eventTicks;
-                }
-
-                return isValid;
-            }
-            else
-            {
-                Cache.Add(key, eventTicks);
-                return true;
-            }
+            return IsValid(key, eventTicks) ? key : (int?)null;                                   
         }
 
-        private int GetUniqueKey(string s1, string s2)
+        public void MarkEventAsProcessed(int key, IEventData eventData)
+        {
+            Cache[key] = eventData.ReceivedOn.Ticks;
+        }
+
+        /// <summary>
+        /// Returns whether the event is considered a duplicate
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="eventTicks"></param>
+        /// <returns></returns>
+        private bool IsValid(int key, long eventTicks)
+        {
+            // The time is considered valid if the difference is greater than MinimumIntervalTicks
+            return Cache.TryGetValue(key, out var lastEventTicks) // If the key exists 
+                        ? eventTicks - lastEventTicks > MinimumIntervalTicks // return whether is it's a duplicate or not
+                        : true; // If not, return true since it's a new event.
+        }
+
+        private int GetUniqueKey(int s1, int s2)
         {
             unchecked
             {
