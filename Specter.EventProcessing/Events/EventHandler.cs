@@ -26,7 +26,7 @@ namespace Specter.EventProcessing.Events
             return new EventHandlerResponse { EventId = id };
         }
 
-        private async Task<Alarm.Events.Event> GetAlarmEvent(IEventData data)
+        private async Task<Models.Events.Event> GetAlarmEvent(IEventData data)
         {
             // Load sensor
             var sensor = await _sensorRepository.GetAsync(data.DeviceId);

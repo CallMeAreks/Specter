@@ -1,4 +1,4 @@
-﻿using Specter.Alarm.Enums;
+﻿using Specter.Models.Enums;
 using Specter.EventProcessing.Events;
 using System;
 
@@ -6,7 +6,7 @@ namespace Specter.EventProcessing.Mappers
 {
     public static class MappingExtensions
     {
-        public static Data.Models.Event ToEntityEvent(this Alarm.Events.Event ev)
+        public static Data.Models.Event ToEntityEvent(this Models.Events.Event ev)
         {
             return new Data.Models.Event
             {
@@ -18,9 +18,9 @@ namespace Specter.EventProcessing.Mappers
             };
         }
 
-        public static Alarm.System.Zone ToAlarmZone(this Data.Models.Zone zone)
+        public static Models.System.Zone ToAlarmZone(this Data.Models.Zone zone)
         {
-            return new Alarm.System.Zone
+            return new Models.System.Zone
             {
                 Id = zone.Id,
                 Number = zone.Number,
@@ -28,9 +28,9 @@ namespace Specter.EventProcessing.Mappers
             };
         }
 
-        public static Alarm.System.Sensor ToAlarmSensor(this Data.Models.Sensor sensor)
+        public static Models.System.Sensor ToAlarmSensor(this Data.Models.Sensor sensor)
         {
-            return new Alarm.System.Sensor
+            return new Models.System.Sensor
             {
                 Id = sensor.Id,
                 Enabled = sensor.Enabled == 1,
@@ -40,9 +40,9 @@ namespace Specter.EventProcessing.Mappers
             };
         }
 
-        public static Alarm.Events.Event ToAlarmEvent(this IEventData eventData, Alarm.System.Sensor sensor, Alarm.System.Zone zone)
+        public static Models.Events.Event ToAlarmEvent(this IEventData eventData, Models.System.Sensor sensor, Models.System.Zone zone)
         {
-            return new Alarm.Events.Event 
+            return new Models.Events.Event 
             {
                 CreatedOn = eventData.ReceivedOn,
                 Sensor = sensor,
