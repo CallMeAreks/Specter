@@ -48,7 +48,6 @@ namespace Specter.EventProcessing.Mappers
                 Sensor = sensor,
                 Zone = zone
             };
-
         }
     }
 }

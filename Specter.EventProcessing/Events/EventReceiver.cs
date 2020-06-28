@@ -7,22 +7,21 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Specter.Data;
+using Specter.Data.Models;
 
 namespace Specter.EventProcessing.Events
 {
     public sealed class EventReceiver
     {
         private static readonly EventReceiver instance = new EventReceiver();
-        private CancellationTokenSource ReceiverCancellationTokenSource = new CancellationTokenSource();
-        private int ProcessId;
+        private readonly CancellationTokenSource _receiverCancellationTokenSource = new CancellationTokenSource();
+        private int _processId;
 
-        private string Rtl433Path => $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\rtl\\rtl_433.exe";
-        private EventRateLimiter RateLimiter = new EventRateLimiter();
-        private EventParser EventParser = new EventParser();
-        private IEventHandler Handler = new DeviceEventHandler();
+        private readonly EventRateLimiter _rateLimiter = new EventRateLimiter();
+        private readonly EventParser _eventParser = new EventParser();
+        private readonly IEventHandler _handler = new DeviceEventHandler();
 
-        // Explicit static constructor to tell C# compiler
-        // not to mark type as beforefieldinit
         static EventReceiver() { }
 
         private EventReceiver() 
@@ -35,14 +34,14 @@ namespace Specter.EventProcessing.Events
 
         public async Task ListenAsync()
         {
-            var cmd = Cli.Wrap(Rtl433Path);
+            var cmd = Cli.Wrap("rtl_433");
 
-            await foreach (var cmdEvent in cmd.ListenAsync(ReceiverCancellationTokenSource.Token))
+            await foreach (var cmdEvent in cmd.ListenAsync(_receiverCancellationTokenSource.Token))
             {
                 switch (cmdEvent)
                 {
                     case StartedCommandEvent started:
-                        ProcessId = started.ProcessId;
+                        _processId = started.ProcessId;
                         Debug.WriteLine($"Process started; ID: {started.ProcessId}");
                         break;
                     case StandardOutputCommandEvent stdOutEvent:
@@ -60,28 +59,25 @@ namespace Specter.EventProcessing.Events
 
         private async Task HandleEvent(StandardOutputCommandEvent ev)
         {
-            var eventData = EventParser.ParseFromJson(ev.Text);
-            var uid = RateLimiter.ValidateEvent(eventData);
-            
+            var eventData = _eventParser.ParseFromJson(ev.Text);
+            var uid = _rateLimiter.ValidateEvent(eventData);
+
             if (uid.HasValue)
             {
-                var response = await Handler.HandleAsync(eventData);
-
+                var response =  await _handler.HandleAsync(eventData);
+            
                 if (response.Success)
                 {
-                    RateLimiter.MarkEventAsProcessed(uid.Value, eventData);
+                    _rateLimiter.MarkEventAsProcessed(uid.Value, eventData);
                 }
             }
         }
 
-        private void CloseRtl433Process()
-        {
-            Process.GetProcessesByName("rtl_433").ToList().ForEach(p => p.Kill());
-        }
+        private void CloseRtl433Process() => Process.GetProcessesByName("rtl_433").ToList().ForEach(p => p.Kill());
 
         public void StopListening()
         {
-            ReceiverCancellationTokenSource.Cancel();
+            _receiverCancellationTokenSource.Cancel();
             CloseRtl433Process();
         }
     }
